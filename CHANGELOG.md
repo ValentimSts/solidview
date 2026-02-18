@@ -40,3 +40,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Wired all tab components (Read, Events, Source, Storage) into the contract dashboard (`components/contract/contract-tabs.tsx`).
 - Not-found pages for invalid routes and contract addresses (`app/not-found.tsx`, `app/[chain]/[address]/not-found.tsx`).
 
+### Changed
+
+- Updated lint script from `next lint` (removed in Next.js 16) to `eslint .` for direct ESLint invocation.
+
+### Removed
+
+- Default Next.js scaffolding SVGs from `public/` (next.svg, vercel.svg, file.svg, globe.svg, window.svg).
+
+### Fixed
+
+- Replaced `as any` type assertions in test files with type-safe `as unknown as ChainSlug` casts.
+

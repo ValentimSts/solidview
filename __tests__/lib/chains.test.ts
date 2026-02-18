@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import type { ChainSlug } from "@/types/contract";
 import { getChainConfig, getAllChains, isValidChainSlug } from "@/lib/chains";
 
 describe("chains", () => {
@@ -25,7 +26,7 @@ describe("chains", () => {
   });
 
   it("throws for unknown chain", () => {
-    expect(() => getChainConfig("solana" as any)).toThrow();
+    expect(() => getChainConfig("solana" as unknown as ChainSlug)).toThrow();
   });
 
   it("getAllChains returns all 5 chains", () => {
