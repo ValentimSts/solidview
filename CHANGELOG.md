@@ -21,4 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shared TypeScript types for contracts, chains, and ABI structures (`types/contract.ts`).
 - Chain configuration for Ethereum, Arbitrum, Optimism, Base, and Polygon (`lib/chains.ts`).
 - Unit tests for chain configuration utilities (`__tests__/lib/chains.test.ts`).
+- Etherscan API client for fetching verified contract ABIs and source code (`lib/etherscan.ts`).
+- Unit tests for Etherscan API client (`__tests__/lib/etherscan.test.ts`).
 
