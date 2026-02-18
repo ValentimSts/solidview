@@ -18,4 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - ESLint configuration via eslint-config-next.
 - Environment variable template (`.env.example`) for blockchain explorer API keys.
 - Project directory structure (`app/`, `components/`, `lib/`, `types/`, `__tests__/`).
+- Shared TypeScript types for contracts, chains, and ABI structures (`types/contract.ts`).
+- Chain configuration for Ethereum, Arbitrum, Optimism, Base, and Polygon (`lib/chains.ts`).
+- Unit tests for chain configuration utilities (`__tests__/lib/chains.test.ts`).
 
