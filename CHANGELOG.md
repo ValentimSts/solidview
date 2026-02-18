@@ -36,4 +36,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Read API route for executing contract read calls via viem (`app/api/read/[chain]/[address]/route.ts`).
 - Events tab displaying event signatures, indexed parameters, and topic hashes (`components/contract/event-list.tsx`).
 - Source code viewer with multi-file tab navigation (`components/contract/source-viewer.tsx`).
+- Storage layout tab displaying contract storage slots and variable mappings (`components/contract/storage-layout.tsx`).
+- Wired all tab components (Read, Events, Source, Storage) into the contract dashboard (`components/contract/contract-tabs.tsx`).
 

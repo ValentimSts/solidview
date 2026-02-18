@@ -3,6 +3,10 @@
 import type { Abi, AbiEvent, AbiFunction } from "viem";
 import type { ChainSlug, ContractSource } from "@/types/contract";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FunctionList } from "@/components/contract/function-list";
+import { EventList } from "@/components/contract/event-list";
+import { SourceViewer } from "@/components/contract/source-viewer";
+import { StorageLayout } from "@/components/contract/storage-layout";
 
 interface ContractTabsProps {
   chain: ChainSlug;
@@ -14,6 +18,8 @@ interface ContractTabsProps {
 }
 
 export function ContractTabs({
+  chain,
+  address,
   readFunctions,
   events,
   source,
@@ -24,25 +30,27 @@ export function ContractTabs({
         <TabsTrigger value="functions">
           Read ({readFunctions.length})
         </TabsTrigger>
-        <TabsTrigger value="events">
-          Events ({events.length})
-        </TabsTrigger>
+        <TabsTrigger value="events">Events ({events.length})</TabsTrigger>
         <TabsTrigger value="source">
           Source ({Object.keys(source.files).length} files)
         </TabsTrigger>
         <TabsTrigger value="storage">Storage</TabsTrigger>
       </TabsList>
       <TabsContent value="functions">
-        <p className="text-muted-foreground">Read functions will go here.</p>
+        <FunctionList
+          functions={readFunctions}
+          chain={chain}
+          address={address}
+        />
       </TabsContent>
       <TabsContent value="events">
-        <p className="text-muted-foreground">Events will go here.</p>
+        <EventList events={events} />
       </TabsContent>
       <TabsContent value="source">
-        <p className="text-muted-foreground">Source code will go here.</p>
+        <SourceViewer source={source} />
       </TabsContent>
       <TabsContent value="storage">
-        <p className="text-muted-foreground">Storage layout will go here.</p>
+        <StorageLayout entries={[]} />
       </TabsContent>
     </Tabs>
   );
