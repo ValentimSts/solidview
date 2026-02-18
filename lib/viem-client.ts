@@ -1,4 +1,4 @@
-import { createPublicClient, http } from "viem";
+import { createPublicClient, http, type PublicClient } from "viem";
 import { mainnet, arbitrum, optimism, base, polygon } from "viem/chains";
 import type { ChainSlug } from "@/types/contract";
 import { getChainConfig } from "@/lib/chains";
@@ -11,11 +11,9 @@ const viemChains = {
   polygon: polygon,
 } as const;
 
-type ViemClient = ReturnType<typeof createPublicClient>;
+const clientCache = new Map<ChainSlug, PublicClient>();
 
-const clientCache = new Map<ChainSlug, ViemClient>();
-
-export function getPublicClient(slug: ChainSlug): ViemClient {
+export function getPublicClient(slug: ChainSlug): PublicClient {
   const cached = clientCache.get(slug);
   if (cached) return cached;
 
@@ -31,6 +29,6 @@ export function getPublicClient(slug: ChainSlug): ViemClient {
     transport: http(chainConfig.rpcUrl),
   });
 
-  clientCache.set(slug, client);
-  return client;
+  clientCache.set(slug, client as PublicClient);
+  return client as PublicClient;
 }
