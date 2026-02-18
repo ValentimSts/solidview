@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import type { ChainSlug } from "@/types/contract";
 import { getPublicClient } from "@/lib/viem-client";
 
 describe("viem-client", () => {
@@ -29,6 +30,6 @@ describe("viem-client", () => {
   });
 
   it("throws for invalid chain", () => {
-    expect(() => getPublicClient("solana" as any)).toThrow();
+    expect(() => getPublicClient("solana" as unknown as ChainSlug)).toThrow();
   });
 });
