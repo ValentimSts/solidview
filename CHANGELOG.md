@@ -38,4 +38,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Source code viewer with multi-file tab navigation (`components/contract/source-viewer.tsx`).
 - Storage layout tab displaying contract storage slots and variable mappings (`components/contract/storage-layout.tsx`).
 - Wired all tab components (Read, Events, Source, Storage) into the contract dashboard (`components/contract/contract-tabs.tsx`).
+- Not-found pages for invalid routes and contract addresses (`app/not-found.tsx`, `app/[chain]/[address]/not-found.tsx`).
 
