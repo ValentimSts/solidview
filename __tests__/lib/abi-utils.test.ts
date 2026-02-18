@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type { Abi } from "viem";
-import { parseContractAbi, formatParamType } from "@/lib/abi-utils";
+import { parseContractAbi } from "@/lib/abi-utils";
 
 const sampleAbi: Abi = [
   {
@@ -127,21 +127,4 @@ describe("abi-utils", () => {
     });
   });
 
-  describe("formatParamType", () => {
-    it("formats address type", () => {
-      expect(formatParamType("address")).toBe("address");
-    });
-
-    it("formats uint256 type", () => {
-      expect(formatParamType("uint256")).toBe("uint256");
-    });
-
-    it("formats array types", () => {
-      expect(formatParamType("uint256[]")).toBe("uint256[]");
-    });
-
-    it("formats tuple types", () => {
-      expect(formatParamType("tuple")).toBe("tuple");
-    });
-  });
 });

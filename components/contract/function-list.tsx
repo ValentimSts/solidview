@@ -20,7 +20,7 @@ export function FunctionList({ functions, chain, address }: FunctionListProps) {
   return (
     <div className="grid gap-4">
       {functions.map((fn) => (
-        <FunctionCard key={fn.name} fn={fn} chain={chain} address={address} />
+        <FunctionCard key={`${fn.name}(${fn.inputs.map(i => i.type).join(',')})`} fn={fn} chain={chain} address={address} />
       ))}
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import type { Abi, AbiEvent, AbiFunction } from "viem";
+import type { AbiEvent, AbiFunction } from "viem";
 import type { ChainSlug, ContractSource } from "@/types/contract";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FunctionList } from "@/components/contract/function-list";
@@ -14,7 +14,6 @@ interface ContractTabsProps {
   readFunctions: AbiFunction[];
   events: AbiEvent[];
   source: ContractSource;
-  abi: Abi;
 }
 
 export function ContractTabs({

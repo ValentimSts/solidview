@@ -29,7 +29,3 @@ export function parseContractAbi(abi: Abi): ParsedAbi {
 
   return { readFunctions, writeFunctions, events };
 }
-
-export function formatParamType(type: string): string {
-  return type;
-}
