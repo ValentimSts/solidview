@@ -72,7 +72,6 @@ export default async function ContractPage({ params }: PageProps) {
         readFunctions={readFunctions}
         events={events}
         source={source}
-        abi={abi}
       />
     </div>
   );

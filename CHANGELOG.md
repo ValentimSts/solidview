@@ -48,7 +48,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Default Next.js scaffolding SVGs from `public/` (next.svg, vercel.svg, file.svg, globe.svg, window.svg).
 
+### Removed
+
+- Unused `formatParamType` identity function from `lib/abi-utils.ts` and its tests.
+- Unused `ParsedContract` interface from `types/contract.ts`.
+- Unused `abi` prop from `ContractTabs` component and its caller in the contract page.
+
 ### Fixed
 
+- React key collision for overloaded Solidity functions in function and event lists by using full type signatures as keys.
 - Replaced `as any` type assertions in test files with type-safe `as unknown as ChainSlug` casts.
 

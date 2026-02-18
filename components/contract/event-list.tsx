@@ -23,7 +23,7 @@ export function EventList({ events }: EventListProps) {
         const hash = toEventHash(event);
 
         return (
-          <Card key={event.name}>
+          <Card key={`${event.name}(${event.inputs.map(i => i.type).join(',')})`}>
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-mono">
                 {event.name}

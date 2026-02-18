@@ -1,5 +1,3 @@
-import type { Abi, AbiEvent, AbiFunction } from "viem";
-
 export type ChainSlug =
   | "ethereum"
   | "arbitrum"
@@ -29,15 +27,4 @@ export interface ContractMetadata {
 export interface ContractSource {
   files: Record<string, string>;
   language: string;
-}
-
-export interface ParsedContract {
-  address: string;
-  chain: ChainSlug;
-  abi: Abi;
-  metadata: ContractMetadata;
-  source: ContractSource;
-  readFunctions: AbiFunction[];
-  writeFunctions: AbiFunction[];
-  events: AbiEvent[];
 }
