@@ -23,4 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Unit tests for chain configuration utilities (`__tests__/lib/chains.test.ts`).
 - Etherscan API client for fetching verified contract ABIs and source code (`lib/etherscan.ts`).
 - Unit tests for Etherscan API client (`__tests__/lib/etherscan.test.ts`).
+- ABI parsing utilities to categorize functions (read/write) and events (`lib/abi-utils.ts`).
+- Unit tests for ABI parsing utilities (`__tests__/lib/abi-utils.test.ts`).
+- Viem public client factory with per-chain caching (`lib/viem-client.ts`).
+- Unit tests for viem public client factory (`__tests__/lib/viem-client.test.ts`).
 
