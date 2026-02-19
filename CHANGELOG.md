@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Etherscan V2 unified API endpoint — single API key covers all supported chains via `chainid` parameter.
+- Chain availability status indicators (green/red dots) in the chain selector dropdown.
+- Offline alert dialog when attempting to explore a contract on an unavailable chain.
+- Chain status API route (`/api/chains/status`) to check API key availability.
+- shadcn/ui Select and AlertDialog components for improved chain selector UX.
+- Example contracts table in README for quick onboarding.
 - Next.js 16 project scaffolding with TypeScript and App Router.
 - Tailwind CSS 4 with PostCSS configuration.
 - shadcn/ui component library with button, card, input, tabs, badge, and separator components.
@@ -42,6 +48,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Migrated from per-chain Etherscan V1 API endpoints to unified V2 endpoint (`https://api.etherscan.io/v2/api`).
+- Replaced native HTML select with shadcn/ui Select component in chain selector.
+- Simplified chain configuration by removing per-chain `explorerApiUrl` and `explorerApiKeyEnv` fields.
 - Updated lint script from `next lint` (removed in Next.js 16) to `eslint .` for direct ESLint invocation.
 
 ### Removed
