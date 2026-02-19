@@ -9,8 +9,6 @@ export interface ChainConfig {
   slug: ChainSlug;
   name: string;
   chainId: number;
-  explorerApiUrl: string;
-  explorerApiKeyEnv: string;
   explorerUrl: string;
   rpcUrl: string;
 }

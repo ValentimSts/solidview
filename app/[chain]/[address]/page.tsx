@@ -21,17 +21,29 @@ export default async function ContractPage({ params }: PageProps) {
 
   const chainSlug = chain as ChainSlug;
   const chainConfig = getChainConfig(chainSlug);
-  const apiKey = process.env[chainConfig.explorerApiKeyEnv];
 
-  if (!apiKey) {
-    throw new Error(`API key not configured for ${chainConfig.name}`);
+  if (!process.env.ETHERSCAN_API_KEY) {
+    return (
+      <div className="mx-auto max-w-5xl p-8">
+        <div className="rounded-lg border border-border bg-muted/50 p-6 text-center">
+          <h2 className="text-lg font-semibold">API Key Required</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            An Etherscan API key is needed to explore contracts.
+          </p>
+          <p className="mt-1 font-mono text-xs text-muted-foreground">
+            Set the <code>ETHERSCAN_API_KEY</code> environment variable to
+            enable contract exploration.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   let abi, metadata, source;
   try {
     const [abiResult, sourceResult] = await Promise.all([
-      fetchContractAbi(chainConfig.explorerApiUrl, apiKey, address),
-      fetchContractSource(chainConfig.explorerApiUrl, apiKey, address),
+      fetchContractAbi(chainConfig.chainId, address),
+      fetchContractSource(chainConfig.chainId, address),
     ]);
     abi = abiResult;
     metadata = sourceResult.metadata;

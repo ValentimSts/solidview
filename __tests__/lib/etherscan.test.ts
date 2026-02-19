@@ -7,6 +7,7 @@ global.fetch = mockFetch;
 describe("etherscan", () => {
   beforeEach(() => {
     vi.resetAllMocks();
+    vi.stubEnv("ETHERSCAN_API_KEY", "test-key");
   });
 
   describe("fetchContractAbi", () => {
@@ -30,8 +31,7 @@ describe("etherscan", () => {
       });
 
       const abi = await fetchContractAbi(
-        "https://api.etherscan.io/api",
-        "test-key",
+        1,
         "0x1234567890123456789012345678901234567890"
       );
 
@@ -50,8 +50,7 @@ describe("etherscan", () => {
 
       await expect(
         fetchContractAbi(
-          "https://api.etherscan.io/api",
-          "test-key",
+          1,
           "0x1234567890123456789012345678901234567890"
         )
       ).rejects.toThrow("Contract source code not verified");
@@ -79,8 +78,7 @@ describe("etherscan", () => {
       });
 
       const result = await fetchContractSource(
-        "https://api.etherscan.io/api",
-        "test-key",
+        1,
         "0x1234567890123456789012345678901234567890"
       );
 
@@ -118,8 +116,7 @@ describe("etherscan", () => {
       });
 
       const result = await fetchContractSource(
-        "https://api.etherscan.io/api",
-        "test-key",
+        1,
         "0x1234567890123456789012345678901234567890"
       );
 
