@@ -24,20 +24,19 @@ export async function GET(_request: Request, { params }: RouteParams) {
     );
   }
 
-  const chainConfig = getChainConfig(chain);
-  const apiKey = process.env[chainConfig.explorerApiKeyEnv];
-
-  if (!apiKey) {
+  if (!process.env.ETHERSCAN_API_KEY) {
     return NextResponse.json(
-      { error: `API key not configured for ${chainConfig.name}` },
+      { error: "Etherscan API key not configured" },
       { status: 500 }
     );
   }
 
+  const chainConfig = getChainConfig(chain);
+
   try {
     const [abi, { metadata, source }] = await Promise.all([
-      fetchContractAbi(chainConfig.explorerApiUrl, apiKey, address),
-      fetchContractSource(chainConfig.explorerApiUrl, apiKey, address),
+      fetchContractAbi(chainConfig.chainId, address),
+      fetchContractSource(chainConfig.chainId, address),
     ]);
 
     return NextResponse.json({ abi, metadata, source });
