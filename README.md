@@ -61,6 +61,16 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+### Example Contracts
+
+Try these verified contracts to get started:
+
+| Contract | Chain | Address |
+|---|---|---|
+| USDC | Ethereum | `0xA0b86991c6218b36c1d1A0D73aeF0f773e962e0C` |
+| Uniswap V2 Router | Ethereum | `0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D` |
+| Aave V3 Pool | Arbitrum | `0x794a61358D6845594F94dc1DB02A252b5b4814aD` |
+
 ### Build
 
 ```bash
