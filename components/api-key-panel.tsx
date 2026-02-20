@@ -9,6 +9,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetDescription,
   SheetTrigger,
 } from "@/components/ui/sheet";
 import {
@@ -158,6 +159,9 @@ export function ApiKeyPanel() {
       <SheetContent side="left" className="w-80 overflow-y-auto sm:w-96">
         <SheetHeader>
           <SheetTitle>API Keys</SheetTitle>
+          <SheetDescription>
+            Configure Etherscan API keys for contract exploration.
+          </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-6 px-1 pt-4">
           <KeyField
