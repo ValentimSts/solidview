@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- API key side panel with primary key field and per-chain overrides, accessible via key icon in the navigation header.
+- API key validation with visual feedback — spinner while validating, green checkmark on success, shake animation and red error message on failure.
+- API key validation endpoint (`/api/keys/validate`) to test keys against Etherscan V2.
+- Client-side API key context (`ApiKeyProvider`) for managing keys without server-side environment variables.
+- Client-side contract loader fallback when no server-side API key is configured.
+- Dark mode support with `next-themes` — system/light/dark toggle in the navigation header, persists across sessions.
+- Persistent navigation header with home link, API key button, and theme toggle across all pages.
+- Recently searched contracts section on the home page — stores last 5 searches in localStorage with truncated address and chain badge.
 - Etherscan V2 unified API endpoint — single API key covers all supported chains via `chainid` parameter.
 - Chain availability status indicators (green/red dots) in the chain selector dropdown.
 - Offline alert dialog when attempting to explore a contract on an unavailable chain.
