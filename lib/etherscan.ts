@@ -20,14 +20,15 @@ function getApiKey(): string {
 
 export async function fetchContractAbi(
   chainId: number,
-  address: string
+  address: string,
+  apiKey?: string
 ): Promise<Abi> {
   const url = new URL(ETHERSCAN_V2_URL);
   url.searchParams.set("chainid", String(chainId));
   url.searchParams.set("module", "contract");
   url.searchParams.set("action", "getabi");
   url.searchParams.set("address", address);
-  url.searchParams.set("apikey", getApiKey());
+  url.searchParams.set("apikey", apiKey ?? getApiKey());
 
   const response = await fetch(url);
   const data = await response.json();
@@ -41,14 +42,15 @@ export async function fetchContractAbi(
 
 export async function fetchContractSource(
   chainId: number,
-  address: string
+  address: string,
+  apiKey?: string
 ): Promise<{ metadata: ContractMetadata; source: ContractSource }> {
   const url = new URL(ETHERSCAN_V2_URL);
   url.searchParams.set("chainid", String(chainId));
   url.searchParams.set("module", "contract");
   url.searchParams.set("action", "getsourcecode");
   url.searchParams.set("address", address);
-  url.searchParams.set("apikey", getApiKey());
+  url.searchParams.set("apikey", apiKey ?? getApiKey());
 
   const response = await fetch(url);
   const data = await response.json();
