@@ -6,6 +6,7 @@ import { parseContractAbi } from "@/lib/abi-utils";
 import { Separator } from "@/components/ui/separator";
 import { ContractHeader } from "@/components/contract-header";
 import { ContractTabs } from "@/components/contract/contract-tabs";
+import { ContractLoader } from "@/components/contract-loader";
 import type { ChainSlug } from "@/types/contract";
 
 interface PageProps {
@@ -23,20 +24,7 @@ export default async function ContractPage({ params }: PageProps) {
   const chainConfig = getChainConfig(chainSlug);
 
   if (!process.env.ETHERSCAN_API_KEY) {
-    return (
-      <div className="mx-auto max-w-5xl p-8">
-        <div className="rounded-lg border border-border bg-muted/50 p-6 text-center">
-          <h2 className="text-lg font-semibold">API Key Required</h2>
-          <p className="mt-2 text-sm text-muted-foreground">
-            An Etherscan API key is needed to explore contracts.
-          </p>
-          <p className="mt-1 font-mono text-xs text-muted-foreground">
-            Set the <code>ETHERSCAN_API_KEY</code> environment variable to
-            enable contract exploration.
-          </p>
-        </div>
-      </div>
-    );
+    return <ContractLoader chain={chainSlug} address={address} />;
   }
 
   let abi, metadata, source;

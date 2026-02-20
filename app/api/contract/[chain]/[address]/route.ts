@@ -24,7 +24,10 @@ export async function GET(_request: Request, { params }: RouteParams) {
     );
   }
 
-  if (!process.env.ETHERSCAN_API_KEY) {
+  const clientKey = _request.headers.get("x-api-key");
+  const apiKey = clientKey || process.env.ETHERSCAN_API_KEY;
+
+  if (!apiKey) {
     return NextResponse.json(
       { error: "Etherscan API key not configured" },
       { status: 500 }
@@ -35,8 +38,8 @@ export async function GET(_request: Request, { params }: RouteParams) {
 
   try {
     const [abi, { metadata, source }] = await Promise.all([
-      fetchContractAbi(chainConfig.chainId, address),
-      fetchContractSource(chainConfig.chainId, address),
+      fetchContractAbi(chainConfig.chainId, address, apiKey),
+      fetchContractSource(chainConfig.chainId, address, apiKey),
     ]);
 
     return NextResponse.json({ abi, metadata, source });
