@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { getAllChains } from "@/lib/chains";
+import { addRecentSearch } from "@/lib/recent-searches";
 import type { ChainSlug } from "@/types/contract";
 
 const chainsBySlug = Object.fromEntries(
@@ -58,6 +59,7 @@ export function AddressInput() {
       return;
     }
 
+    addRecentSearch(trimmed, chain);
     router.push(`/${chain}/${trimmed}`);
   }
 
