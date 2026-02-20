@@ -1,4 +1,5 @@
 import { AddressInput } from "@/components/address-input";
+import { RecentSearches } from "@/components/recent-searches";
 
 export default function Home() {
   return (
@@ -10,6 +11,7 @@ export default function Home() {
         </p>
       </div>
       <AddressInput />
+      <RecentSearches />
     </main>
   );
 }
