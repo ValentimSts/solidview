@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Diagonal sweep transition when switching themes using the View Transitions API, with graceful fallback for unsupported browsers and reduced motion preferences.
+- Playwright E2E testing configuration with Brave browser and theme toggle test suite.
 - API key side panel with primary key field and per-chain overrides, accessible via key icon in the navigation header.
 - API key validation with visual feedback — spinner while validating, green checkmark on success, shake animation and red error message on failure.
 - API key validation endpoint (`/api/keys/validate`) to test keys against Etherscan V2.
@@ -56,6 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Theme toggle redesigned from cycling button to segmented pill with sliding indicator — all three options (light, system, dark) are now visible simultaneously.
 - Migrated from per-chain Etherscan V1 API endpoints to unified V2 endpoint (`https://api.etherscan.io/v2/api`).
 - Replaced native HTML select with shadcn/ui Select component in chain selector.
 - Simplified chain configuration by removing per-chain `explorerApiUrl` and `explorerApiKeyEnv` fields.
