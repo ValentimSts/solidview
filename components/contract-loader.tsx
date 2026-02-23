@@ -15,7 +15,7 @@ interface ContractLoaderProps {
 }
 
 export function ContractLoader({ chain, address }: ContractLoaderProps) {
-  const { getKeyForChain } = useApiKeys();
+  const { getKeyForChain, hasKeyForChain } = useApiKeys();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<{
@@ -29,7 +29,7 @@ export function ContractLoader({ chain, address }: ContractLoaderProps) {
 
   useEffect(() => {
     const key = getKeyForChain(chain);
-    if (!key) {
+    if (!key && !hasKeyForChain(chain)) {
       setError("No API key configured. Add one via the key icon in the header.");
       setLoading(false);
       return;
@@ -38,10 +38,19 @@ export function ContractLoader({ chain, address }: ContractLoaderProps) {
     setLoading(true);
     setError(null);
 
+    const headers: Record<string, string> = {};
+    if (key) headers["x-api-key"] = key;
+
+    const controller = new AbortController();
+
     fetch(`/api/contract/${chain}/${address}`, {
-      headers: { "x-api-key": key },
+      headers,
+      signal: controller.signal,
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch contract data");
+        return res.json();
+      })
       .then((json) => {
         if (json.error) {
           setError(json.error);
@@ -59,9 +68,14 @@ export function ContractLoader({ chain, address }: ContractLoaderProps) {
           });
         }
       })
-      .catch(() => setError("Failed to fetch contract data"))
+      .catch((err) => {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setError("Failed to fetch contract data");
+      })
       .finally(() => setLoading(false));
-  }, [chain, address, getKeyForChain]);
+
+    return () => controller.abort();
+  }, [chain, address, getKeyForChain, hasKeyForChain]);
 
   if (loading) {
     return (

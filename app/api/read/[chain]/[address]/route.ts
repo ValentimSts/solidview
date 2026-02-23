@@ -1,9 +1,11 @@
-import { NextResponse } from "next/server";
 import { isAddress } from "viem";
-import type { Abi } from "viem";
 import { isValidChainSlug } from "@/lib/chains";
 import { getPublicClient } from "@/lib/viem-client";
+import { validateAbiItem } from "@/lib/abi-validation";
 import type { ChainSlug } from "@/types/contract";
+
+const MAX_BODY_SIZE = 10_000; // 10KB
+const MAX_ARGS = 20;
 
 interface RouteParams {
   params: Promise<{ chain: string; address: string }>;
@@ -13,18 +15,45 @@ export async function POST(request: Request, { params }: RouteParams) {
   const { chain, address } = await params;
 
   if (!isValidChainSlug(chain) || !isAddress(address)) {
-    return NextResponse.json(
+    return Response.json(
       { error: "Invalid chain or address" },
       { status: 400 }
     );
   }
 
-  const body = await request.json();
-  const { functionName, args, abi } = body as {
-    functionName: string;
-    args: string[];
-    abi: Abi;
-  };
+  let body: unknown;
+  try {
+    const text = await request.text();
+    if (text.length > MAX_BODY_SIZE) {
+      return Response.json({ error: "Request body too large" }, { status: 413 });
+    }
+    body = JSON.parse(text);
+  } catch {
+    return Response.json({ error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  if (typeof body !== "object" || body === null) {
+    return Response.json({ error: "Request body must be an object" }, { status: 400 });
+  }
+
+  const { functionName, args, abi } = body as Record<string, unknown>;
+
+  if (typeof functionName !== "string" || functionName.length === 0) {
+    return Response.json({ error: "functionName is required" }, { status: 400 });
+  }
+
+  if (!Array.isArray(args) || args.length > MAX_ARGS) {
+    return Response.json({ error: `args must be an array with at most ${MAX_ARGS} items` }, { status: 400 });
+  }
+
+  if (!Array.isArray(abi) || abi.length !== 1) {
+    return Response.json({ error: "abi must be an array with exactly 1 function" }, { status: 400 });
+  }
+
+  const abiError = validateAbiItem(abi[0]);
+  if (abiError) {
+    return Response.json({ error: abiError }, { status: 400 });
+  }
 
   try {
     const client = getPublicClient(chain as ChainSlug);
@@ -33,7 +62,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       address: address as `0x${string}`,
       abi,
       functionName,
-      args,
+      args: args as unknown[],
     });
 
     const serialized = JSON.parse(
@@ -42,9 +71,11 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     );
 
-    return NextResponse.json({ result: serialized });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Read call failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return Response.json({ result: serialized });
+  } catch {
+    return Response.json(
+      { error: "Read call failed" },
+      { status: 500 }
+    );
   }
 }
