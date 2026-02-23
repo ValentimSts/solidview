@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useSyncExternalStore } from "react";
 import { Moon, Monitor, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -15,6 +15,8 @@ const PADDING = 4;
 const BUTTON_SIZE = 28;
 const GAP = 2;
 
+const noop = () => () => {};
+
 function resolveSystemTheme(): "light" | "dark" {
   return window.matchMedia("(prefers-color-scheme: dark)").matches
     ? "dark"
@@ -23,10 +25,8 @@ function resolveSystemTheme(): "light" | "dark" {
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(noop, () => true, () => false);
   const transitionRef = useRef<ViewTransition | null>(null);
-
-  useEffect(() => setMounted(true), []);
 
   const switchTheme = useCallback(
     (newTheme: Theme) => {
