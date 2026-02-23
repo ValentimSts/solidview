@@ -174,7 +174,7 @@ function KeyField({ label, value, fieldKey, chainId, onChange, helpUrl }: KeyFie
 const chains = getAllChains();
 
 export function ApiKeyPanel() {
-  const { primaryKey, chainOverrides, setPrimaryKey, setChainOverride } =
+  const { primaryKey, chainOverrides, setPrimaryKey, setChainOverride, serverKeyAvailable, serverChainKeys } =
     useApiKeys();
   const [overridesOpen, setOverridesOpen] = useState(false);
 
@@ -198,6 +198,11 @@ export function ApiKeyPanel() {
           </SheetDescription>
         </SheetHeader>
         <div className="flex flex-col gap-6 px-4 pt-4">
+          {serverKeyAvailable && !primaryKey && (
+            <p className="text-xs text-muted-foreground rounded-md border border-border bg-muted/50 px-3 py-2">
+              A server-configured API key is active. Enter your own key below to override it.
+            </p>
+          )}
           <KeyField
             label="Etherscan API Key"
             value={primaryKey}
