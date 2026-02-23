@@ -34,7 +34,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       valid: false,
-      error: data.result || "Invalid API key",
+      error: "Invalid API key",
     });
   } catch {
     return NextResponse.json(
