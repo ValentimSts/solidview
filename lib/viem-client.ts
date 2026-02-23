@@ -1,4 +1,4 @@
-import { createPublicClient, http, type PublicClient } from "viem";
+import { createPublicClient, fallback, http, type PublicClient } from "viem";
 import { mainnet, arbitrum, optimism, base, polygon } from "viem/chains";
 import type { ChainSlug } from "@/types/contract";
 import { getChainConfig } from "@/lib/chains";
@@ -24,9 +24,14 @@ export function getPublicClient(slug: ChainSlug): PublicClient {
     throw new Error(`No viem chain for: ${slug}`);
   }
 
+  const envRpcUrl = process.env[`RPC_URL_${slug.toUpperCase()}`];
+  const transport = envRpcUrl
+    ? fallback([http(envRpcUrl), http(chainConfig.rpcUrl)])
+    : http(chainConfig.rpcUrl);
+
   const client = createPublicClient({
     chain: viemChain,
-    transport: http(chainConfig.rpcUrl),
+    transport,
   });
 
   clientCache.set(slug, client as PublicClient);

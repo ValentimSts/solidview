@@ -41,8 +41,16 @@ export function ContractLoader({ chain, address }: ContractLoaderProps) {
     const headers: Record<string, string> = {};
     if (key) headers["x-api-key"] = key;
 
-    fetch(`/api/contract/${chain}/${address}`, { headers })
-      .then((res) => res.json())
+    const controller = new AbortController();
+
+    fetch(`/api/contract/${chain}/${address}`, {
+      headers,
+      signal: controller.signal,
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch contract data");
+        return res.json();
+      })
       .then((json) => {
         if (json.error) {
           setError(json.error);
@@ -60,8 +68,13 @@ export function ContractLoader({ chain, address }: ContractLoaderProps) {
           });
         }
       })
-      .catch(() => setError("Failed to fetch contract data"))
+      .catch((err) => {
+        if (err instanceof Error && err.name === "AbortError") return;
+        setError("Failed to fetch contract data");
+      })
       .finally(() => setLoading(false));
+
+    return () => controller.abort();
   }, [chain, address, getKeyForChain, hasKeyForChain]);
 
   if (loading) {

@@ -2,98 +2,82 @@
 
 Explore, understand, and interact with any verified Ethereum smart contract.
 
-Solidview is a read-only smart contract explorer that gives you a human-readable breakdown of any verified contract's functions, events, storage layout, and lets you query read functions directly. Paste an address, pick a chain, and start exploring.
+<!-- ![Solidview](./assets/screenshot.png) -->
 
-## Supported Networks
+Solidview is a read-only, stateless smart contract explorer. Paste a verified contract address, select a chain, and get a human-readable breakdown of functions, events, storage layout, and query read functions directly.
 
-- Ethereum
-- Arbitrum
-- Optimism
-- Base
-- Polygon
+## Prerequisites
 
-## Tech Stack
+- Node.js 22+
+- pnpm
 
-- **Framework:** Next.js 15 (App Router)
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS 4 + shadcn/ui
-- **Ethereum:** viem
-- **Data Source:** Etherscan family APIs
-- **Testing:** Vitest + Playwright
-
-## Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/) (v18+)
-- [pnpm](https://pnpm.io/) (v9+)
-
-### Installation
+## Quick Start
 
 ```bash
+git clone git@github.com:ValentimSts/solidview.git
+cd solidview
 pnpm install
 ```
 
-### Environment Variables
+Create a `.env.local` file with your Etherscan API key:
 
-Create a `.env.local` file in the project root:
-
-```env
-ETHERSCAN_API_KEY=your_key_here
-ARBISCAN_API_KEY=your_key_here
-OPTIMISM_ETHERSCAN_API_KEY=your_key_here
-BASESCAN_API_KEY=your_key_here
-POLYGONSCAN_API_KEY=your_key_here
+```
+ETHERSCAN_API_KEY=your_api_key_here
 ```
 
-You can get free API keys from:
-- [Etherscan](https://etherscan.io/apis)
-- [Arbiscan](https://arbiscan.io/apis)
-- [OP Etherscan](https://optimistic.etherscan.io/apis)
-- [Basescan](https://basescan.org/apis)
-- [Polygonscan](https://polygonscan.com/apis)
-
-### Development
+Start the development server:
 
 ```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-### Example Contracts
+## Supported Networks
 
-Try these verified contracts to get started:
+| Network   | Chain ID | Explorer API         |
+| --------- | -------- | -------------------- |
+| Ethereum  | 1        | Etherscan            |
+| Arbitrum  | 42161    | Arbiscan             |
+| Optimism  | 10       | Optimism Etherscan   |
+| Base      | 8453     | Basescan             |
+| Polygon   | 137      | Polygonscan          |
 
-| Contract | Chain | Address |
-|---|---|---|
-| USDC | Ethereum | `0xA0b86991c6218b36c1d1A0D73aeF0f773e962e0C` |
-| Uniswap V2 Router | Ethereum | `0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D` |
-| Aave V3 Pool | Arbitrum | `0x794a61358D6845594F94dc1DB02A252b5b4814aD` |
+## Commands
 
-### Build
+| Command         | Description                    |
+| --------------- | ------------------------------ |
+| `pnpm dev`      | Start development server       |
+| `pnpm build`    | Production build               |
+| `pnpm start`    | Run production build locally   |
+| `pnpm lint`     | Run ESLint                     |
+| `pnpm format`   | Run Prettier                   |
+| `pnpm test`     | Run unit tests (Vitest)        |
+| `pnpm test:e2e` | Run E2E tests (Playwright)     |
 
-```bash
-pnpm build
-pnpm start
-```
+## Tech Stack
 
-### Testing
+| Layer       | Choice                    |
+| ----------- | ------------------------- |
+| Framework   | Next.js 16 (App Router)   |
+| Language    | TypeScript                |
+| Styling     | Tailwind CSS 4 + shadcn/ui |
+| Ethereum    | viem                      |
+| Data source | Etherscan V2 API          |
+| Testing     | Vitest + Playwright       |
 
-```bash
-# Unit tests
-pnpm test
+## Architecture
 
-# E2E tests
-pnpm test:e2e
-```
+The project is organized in four layers:
 
-### Linting & Formatting
+- **types/** -- Shared TypeScript types and interfaces for chains, contracts, and metadata.
+- **lib/** -- Core utilities for chain configuration, Etherscan API integration, ABI parsing, and viem client management. This layer has no React dependencies.
+- **components/** -- React components split between reusable UI primitives (shadcn/ui) and domain-specific contract components (function cards, event lists, source viewer).
+- **app/** -- Next.js App Router pages and API routes. Server components handle initial data fetching, with client components for interactive features like read function calls and API key management.
 
-```bash
-pnpm lint
-pnpm format
-```
+## Contributing
+
+Contributions are welcome. Open an issue to discuss what you would like to change, then submit a pull request.
 
 ## License
 
