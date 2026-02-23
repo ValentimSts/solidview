@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Pre-fill API key fields from environment variables (`.env.local`) on page load with automatic validation.
+- Persistent validation state across panel open/close and theme changes via API key context.
+- Empty state indicator (dash icon) for key fields with no key configured.
+- Help icon on the Etherscan API Key field linking to API key documentation.
+- Per-chain overrides collapsible section with bordered container, divider, and animated expand/collapse.
+- Two-section key field layout with input and dedicated state indicator (checkmark, cross, spinner, or dash).
 - Diagonal sweep transition when switching themes using the View Transitions API, with graceful fallback for unsupported browsers and reduced motion preferences.
 - Playwright E2E testing configuration with Brave browser and theme toggle test suite.
 - API key side panel with primary key field and per-chain overrides, accessible via key icon in the navigation header.
@@ -58,6 +64,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Redesigned API key panel with improved padding, two-section key fields, bordered per-chain overrides dropdown, and themed tooltips.
+- Thinner focus ring on input fields (3px → 1.5px).
+- Validation error messages now show as detached rounded boxes with left offset, sliding down from the input.
+- Validation API returns user-friendly "Invalid API key" message instead of raw Etherscan error strings.
 - Theme toggle redesigned from cycling button to segmented pill with sliding indicator — all three options (light, system, dark) are now visible simultaneously.
 - Migrated from per-chain Etherscan V1 API endpoints to unified V2 endpoint (`https://api.etherscan.io/v2/api`).
 - Replaced native HTML select with shadcn/ui Select component in chain selector.
