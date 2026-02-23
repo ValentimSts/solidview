@@ -1,12 +1,42 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import type { AbiEvent, AbiFunction } from "viem";
 import type { ChainSlug, ContractSource } from "@/types/contract";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FunctionList } from "@/components/contract/function-list";
-import { EventList } from "@/components/contract/event-list";
-import { SourceViewer } from "@/components/contract/source-viewer";
-import { StorageLayout } from "@/components/contract/storage-layout";
+
+function TabSkeleton() {
+  return (
+    <div className="space-y-3 py-4">
+      <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+      <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+      <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+    </div>
+  );
+}
+
+const EventList = dynamic(
+  () =>
+    import("@/components/contract/event-list").then((mod) => mod.EventList),
+  { loading: () => <TabSkeleton /> }
+);
+
+const SourceViewer = dynamic(
+  () =>
+    import("@/components/contract/source-viewer").then(
+      (mod) => mod.SourceViewer
+    ),
+  { loading: () => <TabSkeleton /> }
+);
+
+const StorageLayout = dynamic(
+  () =>
+    import("@/components/contract/storage-layout").then(
+      (mod) => mod.StorageLayout
+    ),
+  { loading: () => <TabSkeleton /> }
+);
 
 interface ContractTabsProps {
   chain: ChainSlug;

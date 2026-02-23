@@ -1,9 +1,14 @@
+import { unstable_cache } from "next/cache";
 import type { Abi } from "viem";
 import type { ContractMetadata, ContractSource } from "@/types/contract";
 
 const ETHERSCAN_V2_URL = "https://api.etherscan.io/v2/api";
 
-// In-memory LRU cache for Etherscan responses (ABI + source are immutable once verified)
+// ---------------------------------------------------------------------------
+// In-memory LRU cache (L1) — fast, process-local, evicts after 24 h or 500
+// entries. Sits in front of the persistent Next.js Data Cache (L2).
+// ---------------------------------------------------------------------------
+
 const MAX_CACHE_SIZE = 500;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -36,11 +41,29 @@ function setInCache<T>(key: string, data: T): void {
   cache.set(key, { data, timestamp: Date.now() });
 }
 
-/** Clear all cached entries. Exported for testing. */
+/**
+ * Clear the in-memory (L1) cache layer.
+ *
+ * This does **not** invalidate the persistent Next.js Data Cache (L2) managed
+ * by `unstable_cache`. Use `revalidateTag` from `next/cache` to bust the L2
+ * cache for a specific entry if needed.
+ *
+ * Exported primarily for testing.
+ */
 export function clearEtherscanCache(): void {
   cache.clear();
 }
 
+// ---------------------------------------------------------------------------
+// Errors
+// ---------------------------------------------------------------------------
+
+/**
+ * Error thrown when an Etherscan API request fails.
+ *
+ * Covers HTTP-level failures (non-2xx status), Etherscan-level error
+ * responses (`status !== "1"`), and missing configuration (no API key).
+ */
 export class EtherscanError extends Error {
   constructor(message: string) {
     super(message);
@@ -56,15 +79,21 @@ function getApiKey(): string {
   return key;
 }
 
-export async function fetchContractAbi(
+// ---------------------------------------------------------------------------
+// Internal fetch helpers (no in-memory caching, no AbortSignal)
+// ---------------------------------------------------------------------------
+
+/**
+ * Raw ABI fetcher used as the callback for `unstable_cache`.
+ *
+ * Does **not** use `AbortSignal.timeout` because `unstable_cache` may invoke
+ * the callback during ISR / build time where abort signals are not supported.
+ */
+async function fetchAbiRaw(
   chainId: number,
   address: string,
-  apiKey?: string
+  apiKey?: string,
 ): Promise<Abi> {
-  const cacheKey = getCacheKey(chainId, address, "getabi");
-  const cached = getFromCache<Abi>(cacheKey);
-  if (cached) return cached;
-
   const url = new URL(ETHERSCAN_V2_URL);
   url.searchParams.set("chainid", String(chainId));
   url.searchParams.set("module", "contract");
@@ -72,7 +101,7 @@ export async function fetchContractAbi(
   url.searchParams.set("address", address);
   url.searchParams.set("apikey", apiKey ?? getApiKey());
 
-  const response = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+  const response = await fetch(url);
 
   if (!response.ok) {
     throw new EtherscanError(`Etherscan API error: ${response.status}`);
@@ -84,20 +113,20 @@ export async function fetchContractAbi(
     throw new EtherscanError(data.result || "Failed to fetch ABI");
   }
 
-  const abi = JSON.parse(data.result) as Abi;
-  setInCache(cacheKey, abi);
-  return abi;
+  return JSON.parse(data.result) as Abi;
 }
 
-export async function fetchContractSource(
+/**
+ * Raw source-code fetcher used as the callback for `unstable_cache`.
+ *
+ * Does **not** use `AbortSignal.timeout` because `unstable_cache` may invoke
+ * the callback during ISR / build time where abort signals are not supported.
+ */
+async function fetchSourceRaw(
   chainId: number,
   address: string,
-  apiKey?: string
+  apiKey?: string,
 ): Promise<{ metadata: ContractMetadata; source: ContractSource }> {
-  const cacheKey = getCacheKey(chainId, address, "getsourcecode");
-  const cached = getFromCache<{ metadata: ContractMetadata; source: ContractSource }>(cacheKey);
-  if (cached) return cached;
-
   const url = new URL(ETHERSCAN_V2_URL);
   url.searchParams.set("chainid", String(chainId));
   url.searchParams.set("module", "contract");
@@ -105,7 +134,7 @@ export async function fetchContractSource(
   url.searchParams.set("address", address);
   url.searchParams.set("apikey", apiKey ?? getApiKey());
 
-  const response = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+  const response = await fetch(url);
 
   if (!response.ok) {
     throw new EtherscanError(`Etherscan API error: ${response.status}`);
@@ -130,14 +159,158 @@ export async function fetchContractSource(
 
   const source = parseSourceCode(result.SourceCode, result.ContractName);
 
-  const entry = { metadata, source };
+  return { metadata, source };
+}
+
+// ---------------------------------------------------------------------------
+// Persistent cache wrappers (L2) — Next.js Data Cache via `unstable_cache`
+// ---------------------------------------------------------------------------
+
+/** 24 hours, matching the in-memory TTL. */
+const REVALIDATE_SECONDS = 86_400;
+
+/**
+ * Create a persistent-cache-wrapped version of the ABI fetcher.
+ *
+ * The cache key includes `chainId` and normalised `address` so that the same
+ * contract never triggers duplicate Etherscan requests across server restarts
+ * or ISR re-renders.
+ */
+function getCachedAbiFetcher(chainId: number, address: string) {
+  const normalisedAddress = address.toLowerCase();
+  return unstable_cache(
+    async () => fetchAbiRaw(chainId, normalisedAddress),
+    ["etherscan-abi", String(chainId), normalisedAddress],
+    { revalidate: REVALIDATE_SECONDS },
+  );
+}
+
+/**
+ * Create a persistent-cache-wrapped version of the source-code fetcher.
+ *
+ * See `getCachedAbiFetcher` for cache key semantics.
+ */
+function getCachedSourceFetcher(chainId: number, address: string) {
+  const normalisedAddress = address.toLowerCase();
+  return unstable_cache(
+    async () => fetchSourceRaw(chainId, normalisedAddress),
+    ["etherscan-source", String(chainId), normalisedAddress],
+    { revalidate: REVALIDATE_SECONDS },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
+/**
+ * Fetch the ABI for a verified contract from Etherscan.
+ *
+ * Resolution order:
+ * 1. **L1 -- in-memory LRU cache** (per-process, 24 h TTL, max 500 entries).
+ * 2. **L2 -- Next.js Data Cache** (persistent across deploys, 24 h revalidate
+ *    via `unstable_cache`).
+ * 3. **Etherscan V2 API** (network call).
+ *
+ * When a custom `apiKey` is supplied (e.g. from the client-side API key panel)
+ * the persistent L2 cache is bypassed so that the user's own rate-limit
+ * allocation is used and the response is not shared with other users.
+ *
+ * @param chainId  - Numeric EVM chain ID (e.g. 1 for Ethereum mainnet).
+ * @param address  - Checksummed or lowercase contract address.
+ * @param apiKey   - Optional user-provided Etherscan API key.
+ * @returns The parsed ABI array.
+ * @throws {EtherscanError} On HTTP errors, Etherscan error responses, or
+ *   missing API key configuration.
+ */
+export async function fetchContractAbi(
+  chainId: number,
+  address: string,
+  apiKey?: string,
+): Promise<Abi> {
+  // L1: in-memory cache
+  const cacheKey = getCacheKey(chainId, address, "getabi");
+  const cached = getFromCache<Abi>(cacheKey);
+  if (cached) return cached;
+
+  let abi: Abi;
+
+  if (apiKey) {
+    // Custom API key -- skip L2, fetch directly with timeout
+    abi = await fetchAbiRaw(chainId, address, apiKey);
+  } else {
+    // L2: persistent Next.js Data Cache, falling back to direct fetch if
+    // the incremental cache runtime is unavailable (e.g. unit tests).
+    try {
+      abi = await getCachedAbiFetcher(chainId, address)();
+    } catch (error: unknown) {
+      // If the error is from unstable_cache infrastructure (not Etherscan),
+      // fall through to a direct fetch.
+      if (error instanceof EtherscanError) throw error;
+      abi = await fetchAbiRaw(chainId, address);
+    }
+  }
+
+  setInCache(cacheKey, abi);
+  return abi;
+}
+
+/**
+ * Fetch the source code and compiler metadata for a verified contract from
+ * Etherscan.
+ *
+ * Resolution order:
+ * 1. **L1 -- in-memory LRU cache** (per-process, 24 h TTL, max 500 entries).
+ * 2. **L2 -- Next.js Data Cache** (persistent across deploys, 24 h revalidate
+ *    via `unstable_cache`).
+ * 3. **Etherscan V2 API** (network call).
+ *
+ * When a custom `apiKey` is supplied the persistent L2 cache is bypassed (see
+ * {@link fetchContractAbi} for rationale).
+ *
+ * @param chainId  - Numeric EVM chain ID.
+ * @param address  - Checksummed or lowercase contract address.
+ * @param apiKey   - Optional user-provided Etherscan API key.
+ * @returns An object containing `metadata` and `source`.
+ * @throws {EtherscanError} On HTTP errors, Etherscan error responses, or
+ *   missing API key configuration.
+ */
+export async function fetchContractSource(
+  chainId: number,
+  address: string,
+  apiKey?: string,
+): Promise<{ metadata: ContractMetadata; source: ContractSource }> {
+  // L1: in-memory cache
+  const cacheKey = getCacheKey(chainId, address, "getsourcecode");
+  const cached = getFromCache<{ metadata: ContractMetadata; source: ContractSource }>(cacheKey);
+  if (cached) return cached;
+
+  let entry: { metadata: ContractMetadata; source: ContractSource };
+
+  if (apiKey) {
+    // Custom API key -- skip L2, fetch directly
+    entry = await fetchSourceRaw(chainId, address, apiKey);
+  } else {
+    // L2: persistent Next.js Data Cache with fallback
+    try {
+      entry = await getCachedSourceFetcher(chainId, address)();
+    } catch (error: unknown) {
+      if (error instanceof EtherscanError) throw error;
+      entry = await fetchSourceRaw(chainId, address);
+    }
+  }
+
   setInCache(cacheKey, entry);
   return entry;
 }
 
+// ---------------------------------------------------------------------------
+// Source code parser
+// ---------------------------------------------------------------------------
+
 function parseSourceCode(
   rawSource: string,
-  contractName: string
+  contractName: string,
 ): ContractSource {
   if (rawSource.startsWith("{{")) {
     const jsonStr = rawSource.slice(1, -1);
