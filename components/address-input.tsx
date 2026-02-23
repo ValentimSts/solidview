@@ -32,10 +32,17 @@ export function AddressInput() {
   const [showOfflineAlert, setShowOfflineAlert] = useState(false);
 
   useEffect(() => {
-    fetch("/api/chains/status")
-      .then((res) => res.json())
+    const controller = new AbortController();
+
+    fetch("/api/chains/status", { signal: controller.signal })
+      .then((res) => {
+        if (!res.ok) throw new Error("Failed to fetch chain status");
+        return res.json();
+      })
       .then((data) => setChainStatus(data))
       .catch(() => {});
+
+    return () => controller.abort();
   }, []);
 
   function handleSubmit(e: React.FormEvent) {

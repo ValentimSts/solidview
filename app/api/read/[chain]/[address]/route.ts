@@ -1,4 +1,3 @@
-import { NextResponse } from "next/server";
 import { isAddress } from "viem";
 import { isValidChainSlug } from "@/lib/chains";
 import { getPublicClient } from "@/lib/viem-client";
@@ -35,7 +34,7 @@ export async function POST(request: Request, { params }: RouteParams) {
   const { chain, address } = await params;
 
   if (!isValidChainSlug(chain) || !isAddress(address)) {
-    return NextResponse.json(
+    return Response.json(
       { error: "Invalid chain or address" },
       { status: 400 }
     );
@@ -45,34 +44,34 @@ export async function POST(request: Request, { params }: RouteParams) {
   try {
     const text = await request.text();
     if (text.length > MAX_BODY_SIZE) {
-      return NextResponse.json({ error: "Request body too large" }, { status: 413 });
+      return Response.json({ error: "Request body too large" }, { status: 413 });
     }
     body = JSON.parse(text);
   } catch {
-    return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
+    return Response.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
   if (typeof body !== "object" || body === null) {
-    return NextResponse.json({ error: "Request body must be an object" }, { status: 400 });
+    return Response.json({ error: "Request body must be an object" }, { status: 400 });
   }
 
   const { functionName, args, abi } = body as Record<string, unknown>;
 
   if (typeof functionName !== "string" || functionName.length === 0) {
-    return NextResponse.json({ error: "functionName is required" }, { status: 400 });
+    return Response.json({ error: "functionName is required" }, { status: 400 });
   }
 
   if (!Array.isArray(args) || args.length > MAX_ARGS) {
-    return NextResponse.json({ error: `args must be an array with at most ${MAX_ARGS} items` }, { status: 400 });
+    return Response.json({ error: `args must be an array with at most ${MAX_ARGS} items` }, { status: 400 });
   }
 
   if (!Array.isArray(abi) || abi.length !== 1) {
-    return NextResponse.json({ error: "abi must be an array with exactly 1 function" }, { status: 400 });
+    return Response.json({ error: "abi must be an array with exactly 1 function" }, { status: 400 });
   }
 
   const abiError = validateAbiItem(abi[0]);
   if (abiError) {
-    return NextResponse.json({ error: abiError }, { status: 400 });
+    return Response.json({ error: abiError }, { status: 400 });
   }
 
   try {
@@ -91,9 +90,11 @@ export async function POST(request: Request, { params }: RouteParams) {
       )
     );
 
-    return NextResponse.json({ result: serialized });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Read call failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return Response.json({ result: serialized });
+  } catch {
+    return Response.json(
+      { error: "Read call failed" },
+      { status: 500 }
+    );
   }
 }

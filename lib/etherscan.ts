@@ -72,7 +72,12 @@ export async function fetchContractAbi(
   url.searchParams.set("address", address);
   url.searchParams.set("apikey", apiKey ?? getApiKey());
 
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+
+  if (!response.ok) {
+    throw new EtherscanError(`Etherscan API error: ${response.status}`);
+  }
+
   const data = await response.json();
 
   if (data.status !== "1") {
@@ -100,7 +105,12 @@ export async function fetchContractSource(
   url.searchParams.set("address", address);
   url.searchParams.set("apikey", apiKey ?? getApiKey());
 
-  const response = await fetch(url);
+  const response = await fetch(url, { signal: AbortSignal.timeout(10_000) });
+
+  if (!response.ok) {
+    throw new EtherscanError(`Etherscan API error: ${response.status}`);
+  }
+
   const data = await response.json();
 
   if (data.status !== "1" || !data.result?.[0]) {
@@ -131,16 +141,20 @@ function parseSourceCode(
 ): ContractSource {
   if (rawSource.startsWith("{{")) {
     const jsonStr = rawSource.slice(1, -1);
-    const parsed = JSON.parse(jsonStr);
-    const files: Record<string, string> = {};
+    try {
+      const parsed = JSON.parse(jsonStr);
+      const files: Record<string, string> = {};
 
-    if (parsed.sources) {
-      for (const [path, data] of Object.entries(parsed.sources)) {
-        files[path] = (data as { content: string }).content;
+      if (parsed.sources) {
+        for (const [path, data] of Object.entries(parsed.sources)) {
+          files[path] = (data as { content: string }).content;
+        }
       }
-    }
 
-    return { files, language: "Solidity" };
+      return { files, language: "Solidity" };
+    } catch {
+      // Fall through to single-file format
+    }
   }
 
   return {
