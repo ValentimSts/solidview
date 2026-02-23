@@ -3,6 +3,44 @@ import type { ContractMetadata, ContractSource } from "@/types/contract";
 
 const ETHERSCAN_V2_URL = "https://api.etherscan.io/v2/api";
 
+// In-memory LRU cache for Etherscan responses (ABI + source are immutable once verified)
+const MAX_CACHE_SIZE = 500;
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+const cache = new Map<string, CacheEntry<unknown>>();
+
+function getCacheKey(chainId: number, address: string, action: string): string {
+  return `${chainId}:${address.toLowerCase()}:${action}`;
+}
+
+function getFromCache<T>(key: string): T | null {
+  const entry = cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.timestamp > CACHE_TTL_MS) {
+    cache.delete(key);
+    return null;
+  }
+  return entry.data as T;
+}
+
+function setInCache<T>(key: string, data: T): void {
+  if (cache.size >= MAX_CACHE_SIZE) {
+    const firstKey = cache.keys().next().value;
+    if (firstKey) cache.delete(firstKey);
+  }
+  cache.set(key, { data, timestamp: Date.now() });
+}
+
+/** Clear all cached entries. Exported for testing. */
+export function clearEtherscanCache(): void {
+  cache.clear();
+}
+
 export class EtherscanError extends Error {
   constructor(message: string) {
     super(message);
@@ -23,6 +61,10 @@ export async function fetchContractAbi(
   address: string,
   apiKey?: string
 ): Promise<Abi> {
+  const cacheKey = getCacheKey(chainId, address, "getabi");
+  const cached = getFromCache<Abi>(cacheKey);
+  if (cached) return cached;
+
   const url = new URL(ETHERSCAN_V2_URL);
   url.searchParams.set("chainid", String(chainId));
   url.searchParams.set("module", "contract");
@@ -37,7 +79,9 @@ export async function fetchContractAbi(
     throw new EtherscanError(data.result || "Failed to fetch ABI");
   }
 
-  return JSON.parse(data.result) as Abi;
+  const abi = JSON.parse(data.result) as Abi;
+  setInCache(cacheKey, abi);
+  return abi;
 }
 
 export async function fetchContractSource(
@@ -45,6 +89,10 @@ export async function fetchContractSource(
   address: string,
   apiKey?: string
 ): Promise<{ metadata: ContractMetadata; source: ContractSource }> {
+  const cacheKey = getCacheKey(chainId, address, "getsourcecode");
+  const cached = getFromCache<{ metadata: ContractMetadata; source: ContractSource }>(cacheKey);
+  if (cached) return cached;
+
   const url = new URL(ETHERSCAN_V2_URL);
   url.searchParams.set("chainid", String(chainId));
   url.searchParams.set("module", "contract");
@@ -72,7 +120,9 @@ export async function fetchContractSource(
 
   const source = parseSourceCode(result.SourceCode, result.ContractName);
 
-  return { metadata, source };
+  const entry = { metadata, source };
+  setInCache(cacheKey, entry);
+  return entry;
 }
 
 function parseSourceCode(
