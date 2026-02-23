@@ -13,6 +13,13 @@ const viemChains = {
 
 const clientCache = new Map<ChainSlug, PublicClient>();
 
+/**
+ * Returns a cached viem {@link PublicClient} for the given chain.
+ * Uses a fallback transport if a `RPC_URL_<CHAIN>` env var is set.
+ * @param slug - The chain to create or retrieve a client for.
+ * @returns A singleton public client configured for the chain.
+ * @throws If no viem chain definition exists for the slug.
+ */
 export function getPublicClient(slug: ChainSlug): PublicClient {
   const cached = clientCache.get(slug);
   if (cached) return cached;

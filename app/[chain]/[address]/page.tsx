@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { isAddress } from "viem";
 import { isValidChainSlug, getChainConfig } from "@/lib/chains";
@@ -11,6 +13,49 @@ import type { ChainSlug } from "@/types/contract";
 
 interface PageProps {
   params: Promise<{ chain: string; address: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { chain, address } = await params;
+
+  if (!isValidChainSlug(chain) || !isAddress(address)) {
+    return { title: "Contract Not Found | Solidview" };
+  }
+
+  const chainConfig = getChainConfig(chain as ChainSlug);
+  const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+
+  try {
+    const { metadata } = await fetchContractSource(chainConfig.chainId, address);
+    return {
+      title: `${metadata.name} | ${chainConfig.name} | Solidview`,
+      description: `Explore ${metadata.name} (${shortAddress}) on ${chainConfig.name} — read functions, events, source code, and storage layout.`,
+    };
+  } catch {
+    return {
+      title: `${shortAddress} | ${chainConfig.name} | Solidview`,
+      description: `Explore contract ${shortAddress} on ${chainConfig.name}.`,
+    };
+  }
+}
+
+function TabsSkeleton() {
+  return (
+    <div className="space-y-4 pt-6">
+      <div className="flex gap-2">
+        {Array.from({ length: 4 }).map((_, i) => (
+          <div key={i} className="h-9 w-24 animate-pulse rounded-md bg-muted" />
+        ))}
+      </div>
+      <div className="space-y-3">
+        <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+        <div className="h-4 w-1/2 animate-pulse rounded bg-muted" />
+        <div className="h-4 w-2/3 animate-pulse rounded bg-muted" />
+      </div>
+    </div>
+  );
 }
 
 export default async function ContractPage({ params }: PageProps) {
@@ -66,13 +111,15 @@ export default async function ContractPage({ params }: PageProps) {
         eventCount={events.length}
       />
       <Separator className="my-6" />
-      <ContractTabs
-        chain={chainSlug}
-        address={address}
-        readFunctions={readFunctions}
-        events={events}
-        source={source}
-      />
+      <Suspense fallback={<TabsSkeleton />}>
+        <ContractTabs
+          chain={chainSlug}
+          address={address}
+          readFunctions={readFunctions}
+          events={events}
+          source={source}
+        />
+      </Suspense>
     </div>
   );
 }

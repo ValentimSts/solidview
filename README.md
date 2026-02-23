@@ -75,6 +75,12 @@ The project is organized in four layers:
 - **components/** -- React components split between reusable UI primitives (shadcn/ui) and domain-specific contract components (function cards, event lists, source viewer).
 - **app/** -- Next.js App Router pages and API routes. Server components handle initial data fetching, with client components for interactive features like read function calls and API key management.
 
+## Documentation
+
+- [API Reference](docs/API.md) — endpoint documentation for all 4 API routes
+- [Architecture](docs/ARCHITECTURE.md) — system overview, data flow, caching, key decisions
+- [Security](docs/SECURITY.md) — security headers, rate limiting, input validation, key handling
+
 ## Contributing
 
 Contributions are welcome. Open an issue to discuss what you would like to change, then submit a pull request.

@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback, useMemo } from "react";
 import type { ChainSlug } from "@/types/contract";
 
+/** Possible states for an API key validation lifecycle. */
 export type ValidationState = "empty" | "idle" | "validating" | "valid" | "invalid";
 
 interface ApiKeyState {
@@ -33,6 +34,11 @@ interface ApiKeyProviderProps {
   serverChainKeys?: Partial<Record<ChainSlug, boolean>>;
 }
 
+/**
+ * Context provider that manages Etherscan API keys and their validation state.
+ * Supports a primary key, per-chain overrides, and server-side key detection.
+ * Wrap the app tree with this provider to enable {@link useApiKeys}.
+ */
 export function ApiKeyProvider({
   children,
   initialPrimaryKey,
@@ -115,6 +121,11 @@ export function ApiKeyProvider({
   );
 }
 
+/**
+ * Hook to access the API key state and actions from {@link ApiKeyProvider}.
+ * @returns The current key state, setters, and validation helpers.
+ * @throws If called outside of an {@link ApiKeyProvider}.
+ */
 export function useApiKeys() {
   const context = useContext(ApiKeyContext);
   if (!context) {
