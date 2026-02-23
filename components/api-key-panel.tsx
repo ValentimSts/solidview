@@ -22,7 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useApiKeys, type ValidationState } from "@/lib/api-key-context";
+import { useApiKeys } from "@/lib/api-key-context";
 import { getAllChains } from "@/lib/chains";
 import type { ChainSlug } from "@/types/contract";
 
@@ -77,7 +77,8 @@ function KeyField({ label, value, fieldKey, chainId, onChange, helpUrl }: KeyFie
   useEffect(() => {
     if (!hasValidatedRef.current && value.trim()) {
       hasValidatedRef.current = true;
-      validate(value);
+      const id = requestAnimationFrame(() => validate(value));
+      return () => cancelAnimationFrame(id);
     }
   }, [value, validate]);
 
@@ -174,7 +175,7 @@ function KeyField({ label, value, fieldKey, chainId, onChange, helpUrl }: KeyFie
 const chains = getAllChains();
 
 export function ApiKeyPanel() {
-  const { primaryKey, chainOverrides, setPrimaryKey, setChainOverride, serverKeyAvailable, serverChainKeys } =
+  const { primaryKey, chainOverrides, setPrimaryKey, setChainOverride, serverKeyAvailable } =
     useApiKeys();
   const [overridesOpen, setOverridesOpen] = useState(false);
 
