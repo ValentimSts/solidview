@@ -32,11 +32,10 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const primaryKey = process.env.ETHERSCAN_API_KEY ?? "";
-  const chainOverrides: Partial<Record<import("@/types/contract").ChainSlug, string>> = {};
+  const serverKeyAvailable = !!process.env.ETHERSCAN_API_KEY;
+  const serverChainKeys: Partial<Record<import("@/types/contract").ChainSlug, boolean>> = {};
   for (const [envVar, slug] of Object.entries(envKeyMap)) {
-    const val = process.env[envVar];
-    if (val) chainOverrides[slug] = val;
+    if (process.env[envVar]) serverChainKeys[slug] = true;
   }
 
   return (
@@ -44,7 +43,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <Providers initialPrimaryKey={primaryKey} initialChainOverrides={chainOverrides}>
+        <Providers serverKeyAvailable={serverKeyAvailable} serverChainKeys={serverChainKeys}>
           <NavHeader />
           {children}
         </Providers>

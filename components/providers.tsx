@@ -7,15 +7,15 @@ import type { ChainSlug } from "@/types/contract";
 
 interface ProvidersProps {
   children: React.ReactNode;
-  initialPrimaryKey?: string;
-  initialChainOverrides?: Partial<Record<ChainSlug, string>>;
+  serverKeyAvailable?: boolean;
+  serverChainKeys?: Partial<Record<ChainSlug, boolean>>;
 }
 
-export function Providers({ children, initialPrimaryKey, initialChainOverrides }: ProvidersProps) {
+export function Providers({ children, serverKeyAvailable, serverChainKeys }: ProvidersProps) {
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <TooltipProvider>
-        <ApiKeyProvider initialPrimaryKey={initialPrimaryKey} initialChainOverrides={initialChainOverrides}>
+        <ApiKeyProvider serverKeyAvailable={serverKeyAvailable} serverChainKeys={serverChainKeys}>
           {children}
         </ApiKeyProvider>
       </TooltipProvider>

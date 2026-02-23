@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { fetchContractAbi, fetchContractSource } from "@/lib/etherscan";
+import { fetchContractAbi, fetchContractSource, clearEtherscanCache } from "@/lib/etherscan";
 
 const mockFetch = vi.fn();
 global.fetch = mockFetch;
@@ -8,6 +8,7 @@ describe("etherscan", () => {
   beforeEach(() => {
     vi.resetAllMocks();
     vi.stubEnv("ETHERSCAN_API_KEY", "test-key");
+    clearEtherscanCache();
   });
 
   describe("fetchContractAbi", () => {
