@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Back-to-home navigation button in nav bar, visible only on contract pages.
 - Lazy-loaded tab content (EventList, SourceViewer, StorageLayout) with `next/dynamic` for smaller initial bundle.
 - `generateMetadata` for contract pages — dynamic title/description with contract name and chain.
 - Suspense boundary around contract tabs with skeleton fallback.
