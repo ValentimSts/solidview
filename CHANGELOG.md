@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Migrated `middleware.ts` to `proxy.ts` per Next.js 16 convention.
+
 ### Added
 
 - Back-to-home navigation button in nav bar, visible only on contract pages.

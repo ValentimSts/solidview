@@ -29,7 +29,7 @@ A `Content-Security-Policy` (CSP) header is not yet configured. Next.js injects 
 
 ## 2. Rate Limiting
 
-The middleware at `middleware.ts` applies an IP-based sliding window rate limiter to all `/api/*` routes before any route handler is reached.
+The proxy at `proxy.ts` applies an IP-based sliding window rate limiter to all `/api/*` routes before any route handler is reached.
 
 ### Parameters
 
@@ -44,7 +44,7 @@ The middleware at `middleware.ts` applies an IP-based sliding window rate limite
 
 ### Behaviour
 
-When a client exceeds the limit, the middleware returns HTTP `429 Too Many Requests` with a `Retry-After` header indicating how many seconds remain until the oldest request in the window expires and a new slot opens.
+When a client exceeds the limit, the proxy returns HTTP `429 Too Many Requests` with a `Retry-After` header indicating how many seconds remain until the oldest request in the window expires and a new slot opens.
 
 ```
 HTTP/1.1 429 Too Many Requests
