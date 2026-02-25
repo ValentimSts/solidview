@@ -17,7 +17,7 @@ This document describes all four HTTP API routes exposed by the Solidview backen
 
 ## Rate Limiting
 
-All routes matching `/api/:path*` are protected by a sliding-window rate limiter implemented in `middleware.ts`.
+All routes matching `/api/:path*` are protected by a sliding-window rate limiter implemented in `proxy.ts`.
 
 | Parameter        | Value                                       |
 |------------------|---------------------------------------------|

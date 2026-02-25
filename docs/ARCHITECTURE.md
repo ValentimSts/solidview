@@ -47,7 +47,7 @@ Solidview is organized into four horizontal layers. Each layer has a single resp
 │  GET  /api/chains/status               — server key discovery   │
 │  POST /api/keys/validate               — API key validation     │
 │                                                                 │
-│  middleware.ts  — IP-based rate limiter (30 req / 60 s)         │
+│  proxy.ts  — IP-based rate limiter (30 req / 60 s)              │
 └───────────────────────────┬─────────────────────────────────────┘
                             │  function calls (same process)
 ┌───────────────────────────▼─────────────────────────────────────┐
@@ -347,7 +347,7 @@ Solidview does not implement wallet connectivity or transaction signing. Write f
 
 ### 5.7 Rate Limiting
 
-`middleware.ts` applies an in-memory sliding-window rate limiter to all `/api/*` routes: 30 requests per 60-second window per IP. The rate limiter uses the same per-process `Map` pattern as the Etherscan cache; it is not shared across instances. Responses that exceed the limit receive HTTP 429 with a `Retry-After` header.
+`proxy.ts` applies an in-memory sliding-window rate limiter to all `/api/*` routes: 30 requests per 60-second window per IP. The rate limiter uses the same per-process `Map` pattern as the Etherscan cache; it is not shared across instances. Responses that exceed the limit receive HTTP 429 with a `Retry-After` header.
 
 ---
 

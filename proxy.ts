@@ -20,7 +20,7 @@ function cleanup(now: number) {
   lastCleanup = now;
 }
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const now = Date.now();
 
   if (now - lastCleanup > CLEANUP_INTERVAL_MS) {
