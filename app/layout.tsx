@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Geist, Geist_Mono } from "next/font/google";
 import { NavHeader } from "@/components/nav-header";
 import { Providers } from "@/components/providers";
@@ -27,11 +28,12 @@ const envKeyMap: Record<string, import("@/types/contract").ChainSlug> = {
   POLYGONSCAN_API_KEY: "polygon",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   const serverKeyAvailable = !!process.env.ETHERSCAN_API_KEY;
   const serverChainKeys: Partial<Record<import("@/types/contract").ChainSlug, boolean>> = {};
   for (const [envVar, slug] of Object.entries(envKeyMap)) {
@@ -43,7 +45,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}
       >
-        <Providers serverKeyAvailable={serverKeyAvailable} serverChainKeys={serverChainKeys}>
+        <Providers serverKeyAvailable={serverKeyAvailable} serverChainKeys={serverChainKeys} nonce={nonce}>
           <NavHeader />
           {children}
         </Providers>
