@@ -137,7 +137,7 @@ Browser                     Next.js Server                 External
 
 ### 2.2 Client-Side Fallback Flow
 
-When `ETHERSCAN_API_KEY` is not set on the server, `ContractPage` renders `<ContractLoader>` instead of fetching directly. `ContractLoader` is a Client Component that reads the user's API key from `ApiKeyContext` and calls the Etherscan proxy route.
+When `ETHERSCAN_API_KEY` is not set on the server, `ContractPage` renders `<ContractLoader>` instead of fetching directly. `ContractLoader` is a Client Component that reads the user's API key from `ApiKeyContext` and calls the Etherscan proxy route. The fetch has a 15-second timeout and is aborted when dependencies change (e.g. API key update) to prevent stale responses from overwriting newer ones.
 
 ```
 Browser                         Next.js Server              Etherscan

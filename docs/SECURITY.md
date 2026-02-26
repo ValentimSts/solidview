@@ -151,6 +151,9 @@ Internal error details are never included in API responses. The pattern used acr
 
 ```typescript
 } catch (error) {
+  if (!(error instanceof EtherscanError)) {
+    console.error("Contract fetch failed:", error);
+  }
   const message =
     error instanceof EtherscanError
       ? error.message
@@ -159,7 +162,7 @@ Internal error details are never included in API responses. The pattern used acr
 }
 ```
 
-Only `EtherscanError` instances — errors that originate from known, controlled paths within the Etherscan client — have their message forwarded to the caller. All other exceptions (network errors, unexpected runtime failures, etc.) are replaced with a generic string. The three generic fallback messages used across the codebase are:
+Only `EtherscanError` instances — errors that originate from known, controlled paths within the Etherscan client — have their message forwarded to the caller. All other exceptions (network errors, unexpected runtime failures, etc.) are replaced with a generic string and logged server-side via `console.error` for observability. The three generic fallback messages used across the codebase are:
 
 - `"Failed to fetch contract data"` — contract proxy route
 - `"Read call failed"` — read route
