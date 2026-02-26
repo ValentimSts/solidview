@@ -43,6 +43,17 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | Base      | 8453     | Basescan             |
 | Polygon   | 137      | Polygonscan          |
 
+## Example Contracts
+
+Try these verified contracts to explore Solidview:
+
+| Contract | Chain | Address | Language |
+| --- | --- | --- | --- |
+| USDC (Circle) | Ethereum | `0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48` | Solidity |
+| WETH | Ethereum | `0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2` | Solidity |
+| Curve stETH/ETH Pool | Ethereum | `0xDC24316b9AE028F1497c275EB9192a3Ea0f67022` | Vyper |
+| Uniswap V3 SwapRouter | Ethereum | `0xE592427A0AEce92De3Edee1F18E0157C05861564` | Solidity |
+
 ## Commands
 
 | Command         | Description                    |
