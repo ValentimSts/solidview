@@ -16,10 +16,7 @@ export function StorageLayout({ entries }: StorageLayoutProps) {
     return (
       <div className="py-8 text-center">
         <p className="text-muted-foreground">
-          Storage layout is not available for this contract.
-        </p>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Storage layout requires compiler metadata with storage output enabled.
+          Storage layout visualization is coming soon.
         </p>
       </div>
     );
