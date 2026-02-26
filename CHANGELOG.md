@@ -10,11 +10,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Vyper contracts now correctly detected and displayed with `.vy` extension instead of `.sol`.
+- Non-string Etherscan error results no longer produce `[object Object]` messages.
+- `parseInt` for compiler optimization runs now defaults to `0` on `NaN`.
+- Race condition in contract loader when API key changes mid-fetch.
+- Contract loader fetch now has a 15-second timeout to prevent indefinite loading.
+- Shiki highlighter singleton resets on initialization failure, allowing retry.
+- Storage layout tab now shows "coming soon" instead of misleading metadata error.
 
 ### Changed
 
 - Migrated `middleware.ts` to `proxy.ts` per Next.js 16 convention.
 - Updated API and architecture docs to reflect Vyper contract support and `detectLanguage()` helper.
+- Added server-side error logging to contract proxy and read API routes.
+- Chain status fetch no longer silently swallows errors.
 
 ### Added
 
