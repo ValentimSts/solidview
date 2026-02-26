@@ -2,9 +2,24 @@
 
 Explore, understand, and interact with any verified Ethereum smart contract.
 
-<!-- ![Solidview](./assets/screenshot.png) -->
-
 Solidview is a read-only, stateless smart contract explorer. Paste a verified contract address, select a chain, and get a human-readable breakdown of functions, events, storage layout, and query read functions directly.
+
+## Screenshots
+
+<div align="center">
+
+![Landing Page](./assets/landing-dark.png)
+
+</div>
+
+| | |
+|---|---|
+| ![Light Theme](./assets/landing-light.png) | ![Theme Transition](./assets/theme-transition.png) |
+| *Light theme* | *Theme sweep transition* |
+| ![Read Functions](./assets/contract-read.png) | ![Events](./assets/contract-events.png) |
+| *Read functions* | *Events* |
+| ![Source Code](./assets/contract-source.png) | |
+| *Syntax-highlighted source* | |
 
 ## Prerequisites
 
