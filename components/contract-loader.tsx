@@ -57,16 +57,19 @@ export function ContractLoader({ chain, address }: ContractLoaderProps) {
   useEffect(() => {
     if (noKeyAvailable) return;
 
-    dispatch({ type: "fetch" });
-
-    const headers: Record<string, string> = {};
-    if (key) headers["x-api-key"] = key;
-
     const controller = new AbortController();
 
+    dispatch({ type: "fetch" });
+
+    const reqHeaders: Record<string, string> = {};
+    if (key) reqHeaders["x-api-key"] = key;
+
     fetch(`/api/contract/${chain}/${address}`, {
-      headers,
-      signal: controller.signal,
+      headers: reqHeaders,
+      signal: AbortSignal.any([
+        controller.signal,
+        AbortSignal.timeout(15_000),
+      ]),
     })
       .then((res) => {
         if (!res.ok) throw new Error("Failed to fetch contract data");
@@ -94,7 +97,11 @@ export function ContractLoader({ chain, address }: ContractLoaderProps) {
       })
       .catch((err) => {
         if (err instanceof Error && err.name === "AbortError") return;
-        dispatch({ type: "error", error: "Failed to fetch contract data" });
+        const message =
+          err instanceof Error && err.name === "TimeoutError"
+            ? "Request timed out"
+            : "Failed to fetch contract data";
+        dispatch({ type: "error", error: message });
       });
 
     return () => controller.abort();
