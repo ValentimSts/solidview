@@ -157,7 +157,7 @@ async function fetchSourceRaw(
     evmVersion: result.EVMVersion || "default",
   };
 
-  const source = parseSourceCode(result.SourceCode, result.ContractName);
+  const source = parseSourceCode(result.SourceCode, result.ContractName, result.CompilerVersion);
 
   return { metadata, source };
 }
@@ -308,10 +308,17 @@ export async function fetchContractSource(
 // Source code parser
 // ---------------------------------------------------------------------------
 
+function detectLanguage(compilerVersion: string): "Solidity" | "Vyper" {
+  return compilerVersion.toLowerCase().startsWith("vyper") ? "Vyper" : "Solidity";
+}
+
 function parseSourceCode(
   rawSource: string,
   contractName: string,
+  compilerVersion: string,
 ): ContractSource {
+  const language = detectLanguage(compilerVersion);
+
   if (rawSource.startsWith("{{")) {
     const jsonStr = rawSource.slice(1, -1);
     try {
@@ -324,14 +331,15 @@ function parseSourceCode(
         }
       }
 
-      return { files, language: "Solidity" };
+      return { files, language };
     } catch {
       // Fall through to single-file format
     }
   }
 
+  const ext = language === "Vyper" ? ".vy" : ".sol";
   return {
-    files: { [`${contractName}.sol`]: rawSource },
-    language: "Solidity",
+    files: { [`${contractName}${ext}`]: rawSource },
+    language,
   };
 }

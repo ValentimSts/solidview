@@ -126,5 +126,72 @@ describe("etherscan", () => {
         "pragma solidity ^0.8.0;"
       );
     });
+
+    it("detects Vyper language from compiler version", async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          status: "1",
+          result: [
+            {
+              SourceCode: "# @version 0.3.7\n@external\ndef foo() -> uint256:\n    return 1",
+              ContractName: "VyperContract",
+              CompilerVersion: "vyper:0.3.7",
+              OptimizationUsed: "0",
+              Runs: "200",
+              LicenseType: "MIT",
+              EVMVersion: "default",
+            },
+          ],
+        }),
+      });
+
+      const result = await fetchContractSource(
+        1,
+        "0x1234567890123456789012345678901234567890"
+      );
+
+      expect(result.source.language).toBe("Vyper");
+      expect(result.source.files).toHaveProperty("VyperContract.vy");
+      expect(result.source.files).not.toHaveProperty("VyperContract.sol");
+    });
+
+    it("detects Vyper language for multi-file JSON source", async () => {
+      const multiSource = JSON.stringify({
+        sources: {
+          "contracts/VyperContract.vy": { content: "# @version 0.3.7" },
+          "interfaces/IFoo.vy": { content: "# interface" },
+        },
+      });
+
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          status: "1",
+          result: [
+            {
+              SourceCode: `{${multiSource}}`,
+              ContractName: "VyperContract",
+              CompilerVersion: "vyper:0.3.7",
+              OptimizationUsed: "0",
+              Runs: "200",
+              LicenseType: "MIT",
+              EVMVersion: "default",
+            },
+          ],
+        }),
+      });
+
+      const result = await fetchContractSource(
+        1,
+        "0x1234567890123456789012345678901234567890"
+      );
+
+      expect(result.source.language).toBe("Vyper");
+      expect(Object.keys(result.source.files)).toHaveLength(2);
+      expect(result.source.files["contracts/VyperContract.vy"]).toBe(
+        "# @version 0.3.7"
+      );
+    });
   });
 });

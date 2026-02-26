@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Vyper contracts now correctly detected and displayed with `.vy` extension instead of `.sol`.
+
 ### Changed
 
 - Migrated `middleware.ts` to `proxy.ts` per Next.js 16 convention.
