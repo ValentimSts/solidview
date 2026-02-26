@@ -21,9 +21,24 @@ All responses — pages and API routes alike — include the following HTTP head
 
 **Source:** `next.config.ts`
 
-### Pending: Content-Security-Policy
+### Content-Security-Policy
 
-A `Content-Security-Policy` (CSP) header is not yet configured. Next.js injects inline scripts during hydration, and Tailwind CSS 4 uses inline styles, both of which require `unsafe-inline` allowances that reduce the value of a naive CSP. A nonce-based CSP is planned once the build pipeline supports nonce injection.
+A nonce-based `Content-Security-Policy` header is set dynamically per request in `proxy.ts`. A unique nonce is generated for each request and forwarded to the root layout via the `x-nonce` request header, where it is passed to the `ThemeProvider` for its inline script.
+
+| Directive | Value | Rationale |
+|---|---|---|
+| `default-src` | `'self'` | Only allow resources from the same origin by default. |
+| `script-src` | `'self' 'nonce-...' 'unsafe-inline' 'wasm-unsafe-eval'` | Same-origin scripts plus nonce for inline scripts. `'unsafe-inline'` is a fallback for browsers without nonce support (ignored when nonce is present). `'wasm-unsafe-eval'` allows shiki's WASM regex engine. In development, `'unsafe-eval'` is added for Next.js Fast Refresh. |
+| `style-src` | `'self' 'unsafe-inline'` | Allows inline `style` attributes used by UI components (e.g. dynamic positioning, shiki token colors). |
+| `img-src` | `'self' data:` | Allows same-origin images and data URIs (e.g. inline SVGs). |
+| `font-src` | `'self'` | Fonts are downloaded at build time by `next/font/google` and served from the same origin. |
+| `connect-src` | `'self'` | All API calls (Etherscan proxy, read calls, key validation) go through same-origin `/api/*` routes. |
+| `frame-ancestors` | `'none'` | Prevents the app from being embedded in frames (supplements `X-Frame-Options: DENY`). |
+| `base-uri` | `'self'` | Prevents `<base>` tag injection. |
+| `form-action` | `'self'` | Restricts form submission targets to the same origin. |
+| `object-src` | `'none'` | Blocks `<object>`, `<embed>`, and `<applet>` elements. |
+
+**Source:** `proxy.ts`, `app/layout.tsx`, `components/providers.tsx`
 
 ---
 
