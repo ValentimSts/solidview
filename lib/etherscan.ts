@@ -110,7 +110,9 @@ async function fetchAbiRaw(
   const data = await response.json();
 
   if (data.status !== "1") {
-    throw new EtherscanError(data.result || "Failed to fetch ABI");
+    const message =
+      typeof data.result === "string" ? data.result : "Failed to fetch ABI";
+    throw new EtherscanError(message);
   }
 
   return JSON.parse(data.result) as Abi;
@@ -143,7 +145,11 @@ async function fetchSourceRaw(
   const data = await response.json();
 
   if (data.status !== "1" || !data.result?.[0]) {
-    throw new EtherscanError(data.result || "Failed to fetch source code");
+    const message =
+      typeof data.result === "string"
+        ? data.result
+        : "Failed to fetch source code";
+    throw new EtherscanError(message);
   }
 
   const result = data.result[0];
@@ -152,7 +158,7 @@ async function fetchSourceRaw(
     name: result.ContractName,
     compilerVersion: result.CompilerVersion,
     optimizationUsed: result.OptimizationUsed === "1",
-    runs: parseInt(result.Runs, 10),
+    runs: parseInt(result.Runs, 10) || 0,
     license: result.LicenseType || "Unknown",
     evmVersion: result.EVMVersion || "default",
   };
