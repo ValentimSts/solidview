@@ -99,6 +99,8 @@ If neither source provides a key, the route returns **HTTP 500** before making a
 }
 ```
 
+> **Language detection:** The `source.language` field is `"Solidity"` for Solidity contracts and `"Vyper"` for Vyper contracts. File keys in `source.files` reflect the detected language — `.sol` for Solidity, `.vy` for Vyper. Language is determined by inspecting the `CompilerVersion` field returned by Etherscan: versions prefixed with `vyper:` indicate Vyper contracts.
+
 **Cache headers returned with every 200 response:**
 
 ```

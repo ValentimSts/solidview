@@ -369,7 +369,7 @@ Chain registry. Exports `getChainConfig(slug)`, `getAllChains()`, and `isValidCh
 
 Etherscan V2 API client. Public API: `fetchContractAbi(chainId, address, apiKey?)`, `fetchContractSource(chainId, address, apiKey?)`, `clearEtherscanCache()`, and the `EtherscanError` class.
 
-Source code parsing handles both single-file contracts and multi-file Standard JSON input (the double-brace `{{…}}` format returned by Etherscan for complex projects). The parsed `ContractSource` type holds a `files: Record<string, string>` map from file path to source content.
+Source code parsing handles both single-file contracts and multi-file Standard JSON input (the double-brace `{{…}}` format returned by Etherscan for complex projects). Language detection (`detectLanguage()`) inspects the `CompilerVersion` field to distinguish Solidity from Vyper contracts; Vyper single-file sources use `.vy` extension instead of `.sol`. The parsed `ContractSource` type holds a `files: Record<string, string>` map from file path to source content.
 
 ### `lib/abi-utils.ts`
 
