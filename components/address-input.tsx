@@ -40,7 +40,10 @@ export function AddressInput() {
         return res.json();
       })
       .then((data) => setChainStatus(data))
-      .catch(() => {});
+      .catch((err) => {
+        if (err instanceof Error && err.name === "AbortError") return;
+        console.error("Failed to fetch chain status:", err);
+      });
 
     return () => controller.abort();
   }, []);
