@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Migrated `middleware.ts` to `proxy.ts` per Next.js 16 convention.
+- Updated API and architecture docs to reflect Vyper contract support and `detectLanguage()` helper.
 
 ### Added
 
