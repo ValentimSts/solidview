@@ -30,6 +30,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Architecture overview documentation (`docs/ARCHITECTURE.md`).
 - Security documentation (`docs/SECURITY.md`).
 - Documentation section in README linking to all docs.
+- Example contract addresses in README (USDC, WETH, Curve stETH/ETH, Uniswap V3).
+- Syntax highlighting in source code viewer using shiki (`github-light`/`github-dark` themes, Solidity + Vyper support).
 
 ## [0.1.0] - 2026-02-23
 
