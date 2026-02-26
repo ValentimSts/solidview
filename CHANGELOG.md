@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation section in README linking to all docs.
 - Example contract addresses in README (USDC, WETH, Curve stETH/ETH, Uniswap V3).
 - Syntax highlighting in source code viewer using shiki (`github-light`/`github-dark` themes, Solidity + Vyper support).
+- Nonce-based `Content-Security-Policy` header with per-request nonce generation, WASM support for shiki, and restrictive default policy.
 
 ## [0.1.0] - 2026-02-23
 
