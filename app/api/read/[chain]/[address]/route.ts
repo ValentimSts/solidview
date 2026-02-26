@@ -72,7 +72,8 @@ export async function POST(request: Request, { params }: RouteParams) {
     );
 
     return Response.json({ result: serialized });
-  } catch {
+  } catch (error) {
+    console.error("Read call failed:", error);
     return Response.json(
       { error: "Read call failed" },
       { status: 500 }

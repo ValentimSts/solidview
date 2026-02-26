@@ -64,6 +64,9 @@ export async function GET(_request: Request, { params }: RouteParams) {
       }
     );
   } catch (error) {
+    if (!(error instanceof EtherscanError)) {
+      console.error("Contract fetch failed:", error);
+    }
     const message =
       error instanceof EtherscanError
         ? error.message
