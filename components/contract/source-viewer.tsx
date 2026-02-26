@@ -15,6 +15,9 @@ function getHighlighter() {
     highlighterPromise = createHighlighter({
       themes: ["github-light", "github-dark"],
       langs: ["solidity", "python"],
+    }).catch((err) => {
+      highlighterPromise = null; // allow retry on next call
+      throw err;
     });
   }
   return highlighterPromise;
