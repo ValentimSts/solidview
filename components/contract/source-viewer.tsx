@@ -1,10 +1,62 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useTheme } from "next-themes";
+import { createHighlighter, type Highlighter, type ThemedToken } from "shiki";
 import { Button } from "@/components/ui/button";
 import type { ContractSource } from "@/types/contract";
 
 const LINE_LIMIT = 1000;
+
+let highlighterPromise: Promise<Highlighter> | null = null;
+
+function getHighlighter() {
+  if (!highlighterPromise) {
+    highlighterPromise = createHighlighter({
+      themes: ["github-light", "github-dark"],
+      langs: ["solidity", "python"],
+    });
+  }
+  return highlighterPromise;
+}
+
+function getShikiLang(language: string): "solidity" | "python" {
+  return language === "Vyper" ? "python" : "solidity";
+}
+
+function getShikiTheme(resolvedTheme: string | undefined): string {
+  return resolvedTheme === "dark" ? "github-dark" : "github-light";
+}
+
+function useHighlightedLines(
+  code: string,
+  language: string,
+): ThemedToken[][] | null {
+  const { resolvedTheme } = useTheme();
+  const [lines, setLines] = useState<ThemedToken[][] | null>(null);
+
+  const shikiLang = getShikiLang(language);
+  const shikiTheme = getShikiTheme(resolvedTheme);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    getHighlighter().then((highlighter) => {
+      if (cancelled) return;
+      const { tokens } = highlighter.codeToTokens(code, {
+        lang: shikiLang,
+        theme: shikiTheme,
+      });
+      setLines(tokens);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [code, shikiLang, shikiTheme]);
+
+  return lines;
+}
 
 interface SourceViewerProps {
   source: ContractSource;
@@ -20,6 +72,15 @@ export function SourceViewer({ source }: SourceViewerProps) {
   const allLines = useMemo(() => content.split("\n"), [content]);
   const totalLines = allLines.length;
   const isTruncated = totalLines > LINE_LIMIT && !expanded;
+
+  const highlightedLines = useHighlightedLines(content, source.language);
+  const visibleTokens = useMemo(() => {
+    if (!highlightedLines) return null;
+    return isTruncated
+      ? highlightedLines.slice(0, LINE_LIMIT)
+      : highlightedLines;
+  }, [highlightedLines, isTruncated]);
+
   const visibleLines = isTruncated ? allLines.slice(0, LINE_LIMIT) : allLines;
 
   if (fileNames.length === 0) {
@@ -65,7 +126,15 @@ export function SourceViewer({ source }: SourceViewerProps) {
                     >
                       {index + 1}
                     </td>
-                    <td className="px-4 py-0 whitespace-pre">{line}</td>
+                    <td className="px-4 py-0 whitespace-pre">
+                      {visibleTokens?.[index]
+                        ? visibleTokens[index].map((token, i) => (
+                            <span key={i} style={{ color: token.color }}>
+                              {token.content}
+                            </span>
+                          ))
+                        : line}
+                    </td>
                   </tr>
                 ))}
               </tbody>
